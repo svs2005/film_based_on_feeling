@@ -8,8 +8,7 @@ def cleaning(s):
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
     s = " ".join(s.split())
     return s
-   
-print(cleaning("Amélie in Paris"))  #my test
+
 
 # looking up titles
 titles = {}
@@ -21,9 +20,6 @@ with open("data/MovieSummaries/movie.metadata.tsv", encoding="utf-8") as f:
         titles[clms[0]] = clms[2]
         
 
-print(len(titles))
-print(list(titles.items())[:3])
-
 # making 1 text block / film
 films = []
 with open("data/MovieSummaries/plot_summaries.txt", encoding="utf-8") as f:
@@ -33,5 +29,25 @@ with open("data/MovieSummaries/plot_summaries.txt", encoding="utf-8") as f:
             continue
         films.append(f"TITLE: {cleaning(titles[wiki_id])}\nPLOT: {cleaning(plot)}\n\n")
 
-print(len(films))
-print(films[0])
+
+# shuffle it, split it, and limit
+random.seed(42)
+random.shuffle(films)
+if LIMIT is not None:
+    films = films[:LIMIT]
+
+n = int(0.9 * len(films))
+train_films = films[:n]
+val_films = films[n:]
+
+
+
+# write to the disk
+with open("data/train.txt", "w", encoding="utf-8") as f:
+    f.write("".join(train_films))
+with open("data/val.txt", "w", encoding="utf-8") as f:
+    f.write("".join(val_films))
+
+# for my sanity
+text = open("data/train.txt", encoding="utf-8").read()
+
